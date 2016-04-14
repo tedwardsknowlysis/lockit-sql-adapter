@@ -27,6 +27,7 @@
   "license": "MIT",
   "dependencies": {
     "couch-pwd": "0.0.1",
+    "merge": "^1.2.0",
     "moment": "^2.6.0",
     "ms": "^0.7.1",
     "sequelize": "^3.3.2",

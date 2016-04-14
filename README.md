@@ -1,3 +1,22 @@
+# Updates:
+  - Add ability to add username and password to SQL Connection in config
+  - Specify the sequelize Model Name (avoid potential conflicts) in config
+  - Add ability to specify sequelize options in config
+```js
+{
+    url: 'mysql://travis:@127.0.0.1:3306/',
+    name: 'users',
+    collection: 'my_user_table',
+    username: 'root',
+    password: 'dbpassword',
+    userModelName: 'LockitUser',
+    options: {
+      // https://github.com/sequelize/sequelize/blob/3e5b8772ef75169685fc96024366bca9958fee63/lib/sequelize.js#L91
+      dialect: 'mysql'
+    }
+}
+```
+
 # Lockit SQL adapter
 
 [![Build Status](https://travis-ci.org/zemirco/lockit-sql-adapter.svg?branch=master)](https://travis-ci.org/zemirco/lockit-sql-adapter) [![NPM version](https://badge.fury.io/js/lockit-sql-adapter.svg)](http://badge.fury.io/js/lockit-sql-adapter)

@@ -5,6 +5,7 @@ var pwd = require('couch-pwd');
 var ms = require('ms');
 var moment = require('moment');
 var Sequelize = require('sequelize');
+var merge = require('merge');
 
 /**
  * Adapter constructor function
@@ -25,11 +26,20 @@ var Adapter = module.exports = function(config) {
 
   // create connection string
   var uri = config.db.url + config.db.name;
-  var sequelize = new Sequelize(uri, {
-    storage: config.db.name
-  });
+  var sqlConfig = merge({storage: config.db.name}, config.db.options);
+  var uri = config.db.url + config.db.name,
+      username = config.db.username ? config.db.username : null,
+      password = config.db.password ? config.db.password : null,
+      userModelName = config.modelName ? config.modelName : 'User',
+      sqlConfig = {
+        storage: config.db.name
+      }
+  ;
 
-  this.User = sequelize.define('User', {
+  var sequelize = new Sequelize(uri, username, password, sqlConfig);
+  var userModelName = config.modelName ? config.modelName : 'User';
+
+  this.User = sequelize.define(userModelName, {
     // make id like CouchDB and MongoDB
     _id: {
       type: Sequelize.INTEGER,
