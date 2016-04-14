@@ -5,11 +5,13 @@ exports.dbs = {
   //  collection: 'my_user_table'
   //},
   mysql: {
+    url: 'mysql://localhost:3306',
+    ignoreUrl: true,
     name: 'lockit',
     collection: 'LockitUsers',
     userModelName: 'LockitUser',
     username: 'root',
-    password: 'Kn0wlys1s',
+    password: 'password',
     options: {
       // https://github.com/sequelize/sequelize/blob/3e5b8772ef75169685fc96024366bca9958fee63/lib/sequelize.js#L91
       dialect: 'mysql',

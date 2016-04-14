@@ -34,7 +34,7 @@ var Adapter = module.exports = function(config) {
         storage: config.db.name
       }
   ;
-  if (config.db.url) {
+  if (!config.db.ignoreUrl) {
     uri = config.db.url + config.db.name;
   }
   var sequelize = new Sequelize(uri, username, password, sqlConfig);
