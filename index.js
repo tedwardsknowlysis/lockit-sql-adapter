@@ -25,9 +25,8 @@ var Adapter = module.exports = function(config) {
   this.config = config;
 
   // create connection string
-  var uri = config.db.url + config.db.name;
   var sqlConfig = merge({storage: config.db.name}, config.db.options);
-  var uri = config.db.url + config.db.name,
+  var uri = config.db.name,
       username = config.db.username ? config.db.username : null,
       password = config.db.password ? config.db.password : null,
       userModelName = config.modelName ? config.modelName : 'User',
@@ -35,9 +34,10 @@ var Adapter = module.exports = function(config) {
         storage: config.db.name
       }
   ;
-
+  if (config.db.url) {
+    uri = config.db.url + config.db.name;
+  }
   var sequelize = new Sequelize(uri, username, password, sqlConfig);
-  var userModelName = config.modelName ? config.modelName : 'User';
 
   this.User = sequelize.define(userModelName, {
     // make id like CouchDB and MongoDB

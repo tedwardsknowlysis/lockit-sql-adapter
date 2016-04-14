@@ -7,11 +7,7 @@ var config = require('./config.js');
 Object.keys(config.dbs).forEach(function(obj) {
 
   var conf = {
-    db: {
-      url: config.dbs[obj].url,
-      name: config.dbs[obj].name,
-      collection: config.dbs[obj].collection
-    },
+    db: config.dbs[obj],
     signup: config.signup
   };
 

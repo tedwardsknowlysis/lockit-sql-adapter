@@ -1,7 +1,7 @@
 
-BIN = ./node_modules/.bin
-MOCHA = $(BIN)/mocha
-ESLINT = $(BIN)/eslint
+BIN = .\node_modules\.bin
+MOCHA = $(BIN)\mocha
+ESLINT = $(BIN)\eslint
 
 test:
 	$(MOCHA)
