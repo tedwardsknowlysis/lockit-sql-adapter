@@ -24,6 +24,10 @@ var Adapter = module.exports = function(config) {
 
   this.config = config;
 
+  this.idField = config.idField ? config.idField : '_id';
+  this.emailField = config.emailField ? config.emailField : 'email';
+  this.nameField = config.nameField ? config.nameField : 'name';
+
   // create connection string
   var sqlConfig = merge({storage: config.db.name}, config.db.options);
   var uri = config.db.name,
@@ -39,35 +43,33 @@ var Adapter = module.exports = function(config) {
   }
   var sequelize = new Sequelize(uri, username, password, sqlConfig);
 
-  this.User = sequelize.define(userModelName, {
-    // make id like CouchDB and MongoDB
-    _id: {
+  var userDef = {
+    // signup
+    derived_key: Sequelize.STRING,
+    salt: Sequelize.STRING,
+
+    //signupToken: Sequelize.STRING,
+    //signupTimestamp: Sequelize.DATE,
+    //signupTokenExpires: Sequelize.DATE,
+    //failedLoginAttempts: Sequelize.INTEGER,
+    //emailVerificationTimestamp: Sequelize.DATE,
+    //emailVerified: Sequelize.BOOLEAN,
+
+    // forgot password
+    pwdResetToken: Sequelize.STRING,
+    pwdResetTokenExpires: Sequelize.DATE
+  };
+
+  // make id like CouchDB and MongoDB
+  userDef[this.idField] = {
       type: Sequelize.INTEGER,
       autoIncrement: true,
       primaryKey: true
-    },
-    // signup
-    name: Sequelize.STRING,
-    email: Sequelize.STRING,
-    derived_key: Sequelize.STRING,
-    salt: Sequelize.STRING,
-    signupToken: Sequelize.STRING,
-    signupTimestamp: Sequelize.DATE,
-    signupTokenExpires: Sequelize.DATE,
-    failedLoginAttempts: Sequelize.INTEGER,
-    emailVerificationTimestamp: Sequelize.DATE,
-    emailVerified: Sequelize.BOOLEAN,
-    // forgot password
-    pwdResetToken: Sequelize.STRING,
-    pwdResetTokenExpires: Sequelize.DATE,
-    // login
-    accountLocked: Sequelize.BOOLEAN,
-    accountLockedUntil: Sequelize.DATE,
-    previousLoginTime: Sequelize.DATE,
-    previousLoginIp: Sequelize.STRING,
-    currentLoginTime: Sequelize.DATE,
-    currentLoginIp: Sequelize.STRING
-  }, {
+    };
+  userDef[this.nameField] = Sequelize.STRING;
+  userDef[this.emailField] = Sequelize.STRING;
+
+  this.User = sequelize.define(userModelName, userDef, {
     tableName: config.db.collection,   // this will define the table's name
     timestamps: false                 // this will deactivate the timestamp columns
   });
@@ -91,7 +93,7 @@ var Adapter = module.exports = function(config) {
      if (err) console.log(err);
      console.log(user);
      // {
-     //   _id: 1,
+     //   id: 1,
      //   name: 'john',
      //   email: 'john@email.com',
      //   derived_key: 'c4c7a83f7b3936437798316d4c7b8c7b731a55dc',
@@ -123,24 +125,33 @@ Adapter.prototype.save = function(name, email, pw, done) {
   var now = moment().toDate();
   var timespan = ms(that.config.signup.tokenExpiration);
   var future = moment().add(timespan, 'ms').toDate();
+  var emailField = this.emailField,
+      nameField = this.nameField
+  ;
   // create hashed password
   pwd.hash(pw, function(err, salt, hash) {
     if (err) {return done(err); }
-    var user = that.User.build({
-      name: name,
-      email: email,
-      signupToken: uuid.v4(),
-      signupTimestamp: now,
-      signupTokenExpires: future,
-      failedLoginAttempts: 0,
+    var buildDef = {
+      //signupToken: uuid.v4(),
+      //signupTimestamp: now,
+      //signupTokenExpires: future,
+      //failedLoginAttempts: 0,
       salt: salt,
       derived_key: hash
-    });
+    };
+    buildDef[emailField] = email;
+    buildDef[nameField] = name;
+
+    var user = that.User.build(buildDef);
+
+    var whereClause = {};
+    whereClause[emailField] = email;
+
     // save user to db
     user.save()
       .then(function() {
         // find user to return it in callback
-        that.User.find({ where: {email: email} })
+        that.User.find({ where: whereClause })
           .then(function(foundUser) {
             done(null, foundUser.dataValues);
           })
@@ -162,7 +173,7 @@ Adapter.prototype.save = function(name, email, pw, done) {
      if (err) console.log(err);
      console.log(user);
      // {
-     //   _id: 1,
+     //   id: 1,
      //   name: 'john',
      //   email: 'john@email.com',
      //   derived_key: '75b43d8393715cbf476ee55b12f888246d7f7015',
@@ -221,14 +232,16 @@ Adapter.prototype.find = function(match, query, done) {
      });
    });
  *
- * @param {Object} user - User object with `user._id`
+ * @param {Object} user - User object with `user.id`
  * @param {Function} done - Callback function having `err` and `user` as arguments
  */
 Adapter.prototype.update = function(user, done) {
   var that = this;
-  that.User.update(user, {where: {_id: user._id}})
+  var idClause = {};
+  idClause[this.idField] = user[this.idField];
+  that.User.update(user, {where: idClause})
     .then(function() {
-      that.User.findById(user._id)
+      that.User.findById(user.id)
         .then(function(foundUser) {
           done(null, foundUser.dataValues);
         })
@@ -255,6 +268,9 @@ Adapter.prototype.update = function(user, done) {
  * @param {Function} done - Callback function having `err` and `res` arguments
  */
 Adapter.prototype.remove = function(name, done) {
+  var clause = {};
+  clause[this.nameField] = name;
+  that.User.update(user, {where: clause})
   this.User.find({ where: {name: name} })
     .then(function(user) {
       if (!user) {return done(new Error('lockit - Cannot find user "' + name + '"')); }
