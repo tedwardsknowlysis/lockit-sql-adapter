@@ -24,6 +24,10 @@ var Adapter = module.exports = function(config) {
 
   this.config = config;
 
+  this.includeForgotPassword = config.includeForgotPassword ? config.includeForgotPassword : false;
+  this.includeLogin = config.includeLogin ? config.includeLogin : false;
+  this.includeSignup = config.includeSignup ? config.includeSignup : false;
+
   this.idField = config.idField ? config.idField : '_id';
   this.emailField = config.emailField ? config.emailField : 'email';
   this.nameField = config.nameField ? config.nameField : 'name';
@@ -46,28 +50,40 @@ var Adapter = module.exports = function(config) {
   var userDef = {
     // signup
     derived_key: Sequelize.STRING,
-    salt: Sequelize.STRING,
-
-    //signupToken: Sequelize.STRING,
-    //signupTimestamp: Sequelize.DATE,
-    //signupTokenExpires: Sequelize.DATE,
-    //failedLoginAttempts: Sequelize.INTEGER,
+    salt: Sequelize.STRING
     //emailVerificationTimestamp: Sequelize.DATE,
-    //emailVerified: Sequelize.BOOLEAN,
-
-    // forgot password
-    pwdResetToken: Sequelize.STRING,
-    pwdResetTokenExpires: Sequelize.DATE
+    //emailVerified: Sequelize.BOOLEAN
   };
 
   // make id like CouchDB and MongoDB
   userDef[this.idField] = {
-      type: Sequelize.INTEGER,
-      autoIncrement: true,
-      primaryKey: true
-    };
+    type: Sequelize.INTEGER,
+    autoIncrement: true,
+    primaryKey: true
+  };
   userDef[this.nameField] = Sequelize.STRING;
   userDef[this.emailField] = Sequelize.STRING;
+
+  if (this.includeForgotPassword) {
+    userDef.pwdResetToken = Sequelize.STRING;
+    userDef.pwdResetTokenExpires = Sequelize.DATE;
+  }
+
+  if (this.includeSignup) {
+    userDef.signupToken = Sequelize.STRING;
+    userDef.signupTimestamp = Sequelize.DATE;
+    userDef.signupTokenExpires = Sequelize.DATE;
+  }
+
+  if (this.includeLogin) {
+    userDef.failedLoginAttempts = Sequelize.INTEGER;
+    userDef.accountLocked = Sequelize.BOOLEAN;
+    userDef.accountLockedUntil = Sequelize.DATE;
+    userDef.previousLoginTime = Sequelize.DATE;
+    userDef.previousLoginIp = Sequelize.STRING;
+    userDef.currentLoginTime = Sequelize.DATE;
+    userDef.currentLoginIp = Sequelize.STRING;
+  }
 
   this.User = sequelize.define(userModelName, userDef, {
     tableName: config.db.collection,   // this will define the table's name
