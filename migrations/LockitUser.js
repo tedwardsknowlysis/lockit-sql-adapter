@@ -1,38 +1,80 @@
+'use strict';
+
 module.exports = {
-    up: function(queryInterface, Sequelize) {
-        // logic for transforming into the new state
-        return queryInterface.createTable('LockitUsers', {
-            // make id like CouchDB and MongoDB
+    up: function (queryInterface, Sequelize) {
+        /*
+         Add altering commands here.
+         Return a promise to correctly handle asynchronicity.
+
+         Example:
+         return queryInterface.createTable('users', { id: Sequelize.INTEGER });
+         */
+        queryInterface.createTable('lockitusers', {
             _id: {
-                type: Sequelize.INTEGER,
+                allowNull: false,
                 autoIncrement: true,
+                type: Sequelize.INTEGER,
                 primaryKey: true
             },
-            // signup
-            name: Sequelize.STRING,
-            email: Sequelize.STRING,
+            name: {
+                type: Sequelize.STRING,
+                unique: true
+            },
+            email: {
+                type: Sequelize.STRING,
+                unique: true
+            },
             derived_key: Sequelize.STRING,
+            //password: Sequelize.STRING,
             salt: Sequelize.STRING,
-            signupToken: Sequelize.STRING,
+            signupToken: {
+                type: Sequelize.STRING,
+                unique: true
+            },
             signupTimestamp: Sequelize.DATE,
             signupTokenExpires: Sequelize.DATE,
-            failedLoginAttempts: Sequelize.INTEGER,
+            failedLoginAttempts: {
+                type: Sequelize.INTEGER,
+                defaultValue: 0
+            },
             emailVerificationTimestamp: Sequelize.DATE,
-            emailVerified: Sequelize.BOOLEAN,
-            // forgot password
-            pwdResetToken: Sequelize.STRING,
+            emailVerified: {
+                type: Sequelize.BOOLEAN,
+                defaultValue: false
+            },
+            pwdResetToken: {
+                type: Sequelize.STRING,
+                unique: true
+            },
             pwdResetTokenExpires: Sequelize.DATE,
-            // login
-            accountLocked: Sequelize.BOOLEAN,
+            accountLocked: {
+                type: Sequelize.BOOLEAN,
+                defaultValue: false
+            },
             accountLockedUntil: Sequelize.DATE,
             previousLoginTime: Sequelize.DATE,
             previousLoginIp: Sequelize.STRING,
             currentLoginTime: Sequelize.DATE,
-            currentLoginIp: Sequelize.STRING
+            currentLoginIp: Sequelize.STRING,
+            createdAt: {
+                allowNull: false,
+                type: Sequelize.DATE
+            },
+            updatedAt: {
+                allowNull: false,
+                type: Sequelize.DATE
+            }
         });
     },
-    down: function(queryInterface, Sequelize) {
-        // logic for reverting the changes
-        return queryInterface.dropTable('LockitUsers');
+
+    down: function (queryInterface, Sequelize) {
+        /*
+         Add reverting commands here.
+         Return a promise to correctly handle asynchronicity.
+
+         Example:
+         return queryInterface.dropTable('users');
+         */
+        queryInterface.dropTable('lockitusers');
     }
-}
+};

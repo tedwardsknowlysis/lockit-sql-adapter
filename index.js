@@ -64,17 +64,6 @@ var Adapter = module.exports = function(config) {
   userDef[this.nameField] = Sequelize.STRING;
   userDef[this.emailField] = Sequelize.STRING;
 
-  if (this.includeForgotPassword) {
-    userDef.pwdResetToken = Sequelize.STRING;
-    userDef.pwdResetTokenExpires = Sequelize.DATE;
-  }
-
-  if (this.includeSignup) {
-    userDef.signupToken = Sequelize.STRING;
-    userDef.signupTimestamp = Sequelize.DATE;
-    userDef.signupTokenExpires = Sequelize.DATE;
-  }
-
   if (this.includeLogin) {
     userDef.failedLoginAttempts = Sequelize.INTEGER;
     userDef.accountLocked = Sequelize.BOOLEAN;
@@ -83,6 +72,19 @@ var Adapter = module.exports = function(config) {
     userDef.previousLoginIp = Sequelize.STRING;
     userDef.currentLoginTime = Sequelize.DATE;
     userDef.currentLoginIp = Sequelize.STRING;
+  }
+
+  if (this.includeSignup) {
+    userDef.signupToken = Sequelize.STRING;
+    userDef.signupTimestamp = Sequelize.DATE;
+    userDef.signupTokenExpires = Sequelize.DATE;
+    userDef.emailVerificationTimestamp = Sequelize.DATE;
+    userDef.emailVerified = Sequelize.BOOLEAN;
+  }
+
+  if (this.includeForgotPassword) {
+    userDef.pwdResetToken = Sequelize.STRING;
+    userDef.pwdResetTokenExpires = Sequelize.DATE;
   }
 
   this.User = sequelize.define(userModelName, userDef, {
