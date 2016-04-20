@@ -109,7 +109,7 @@ var Adapter = module.exports = function(config) {
      if (err) console.log(err);
      console.log(user);
      // {
-     //   id: 1,
+     //   _id: 1,
      //   name: 'john',
      //   email: 'john@email.com',
      //   derived_key: 'c4c7a83f7b3936437798316d4c7b8c7b731a55dc',
@@ -144,19 +144,26 @@ Adapter.prototype.save = function(name, email, pw, done) {
   var emailField = this.emailField,
       nameField = this.nameField
   ;
+  var includeLogin = this.includeLogin,
+      includeSignup = this.includeSignup
+  ;
   // create hashed password
   pwd.hash(pw, function(err, salt, hash) {
     if (err) {return done(err); }
     var buildDef = {
-      //signupToken: uuid.v4(),
-      //signupTimestamp: now,
-      //signupTokenExpires: future,
-      //failedLoginAttempts: 0,
       salt: salt,
       derived_key: hash
     };
     buildDef[emailField] = email;
     buildDef[nameField] = name;
+    if (includeLogin) {
+      buildDef.failedLoginAttempts = 0;
+    }
+    if (includeSignup) {
+      buildDef.signupToken = uuid.v4();
+      buildDef.signupTimestamp = now;
+      buildDef.signupTokenExpires = future;
+    }
 
     var user = that.User.build(buildDef);
 
@@ -189,7 +196,7 @@ Adapter.prototype.save = function(name, email, pw, done) {
      if (err) console.log(err);
      console.log(user);
      // {
-     //   id: 1,
+     //   _id: 1,
      //   name: 'john',
      //   email: 'john@email.com',
      //   derived_key: '75b43d8393715cbf476ee55b12f888246d7f7015',
