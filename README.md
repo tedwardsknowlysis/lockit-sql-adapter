@@ -4,16 +4,20 @@
   - Include params in config to influence what items are included in the User Object
   - Add ability to specify sequelize options in config
 ```js
-{
-    url: 'mysql://travis:@127.0.0.1:3306/',
-    name: 'users',
-    collection: 'my_user_table',
+exports.db = {
+    url: 'mysql://root:password@locahost:3306/database_name',
+    ignoreUrl: true,                // Used to ignore above URL in SQL adapter logic (to allow for backward compatibilty)
+    name: 'database_name',          // Name of the Database
     username: 'root',
-    password: 'dbpassword',
-    userModelName: 'LockitUser',
-    options: {
-      // https://github.com/sequelize/sequelize/blob/3e5b8772ef75169685fc96024366bca9958fee63/lib/sequelize.js#L91
-      dialect: 'mysql'
+    password: 'password',
+    userModelName: 'LockitUser',    // Used to name the Sequelize model
+    collection: 'users',            // Name of the table
+    options: {                      // Options used by Sequelize
+        // https://github.com/sequelize/sequelize/blob/3e5b8772ef75169685fc96024366bca9958fee63/lib/sequelize.js#L91
+        database: "database_name",
+        host: "localhost",
+        port: 3306,
+        dialect: "mysql"
     }
 }
 ```
@@ -35,6 +39,8 @@ exports.includeSignup = false;
     //userDef.signupToken = Sequelize.STRING;
     //userDef.signupTimestamp = Sequelize.DATE;
     //userDef.signupTokenExpires = Sequelize.DATE;
+    //userDef.emailVerificationTimestamp = Sequelize.DATE;
+    //userDef.emailVerified = Sequelize.BOOLEAN;
 
 exports.includeForgotPassword = true;
     //userDef.pwdResetToken = Sequelize.STRING;
